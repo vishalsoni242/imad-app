@@ -5,6 +5,7 @@ var config = {
     port: '5432',
     password: 'db-vishalhari24-16682'
 };
+var Pool = require('pg').Pool;
 var bodyParser = require('body-parser');
 var express = require('express');
 var morgan = require('morgan');
@@ -42,7 +43,7 @@ app.get('/hash/:input' , function(req,res) {
    var hashedstring = hash(req.params.input , 'this-is-random-string');
    res.send(hashedstring);
 });
-var pool = new pool(config);
+var pool = new Pool(config);
 app.post('/create-user',function(req,res) {
     var username = req.body.username;
     var password = req.body.password;
