@@ -42,7 +42,7 @@ app.get('/hash/:input' , function(req,res) {
    var hashedstring = hash(req.params.input , 'this-is-random-string');
    res.send(hashedstring);
 });
-var pool = new Pool(config);
+var pool = new pool(config);
 app.post('/create-user',function(req,res) {
     var username = req.body.username;
     var password = req.body.password;
