@@ -36,12 +36,14 @@ app.get('/ui/madi.png', function (req, res) {
 
 function hash(input,salt) {
     var hashed = crypto.pbkdf2Sync(input,salt,10000,512,'sha512');
-    return hashed.toString('hex');
+    return ["pbkdf2","10000",salt,hashed.toString('hex')].join('$');
+    //return hashed.toString('hex');
 }
 
 app.get('/hash/:input' , function(req,res) {
    var hashedstring = hash(req.params.input , 'this-is-random-string');
    res.send(hashedstring);
+   
 });
 var pool = new Pool(config);
 app.post('/create-user',function(req,res) {
@@ -60,7 +62,29 @@ app.post('/create-user',function(req,res) {
 });
 // Do not change port, otherwise your app won't run on IMAD servers
 // Use 8080 only for local development if you already have apache running on 80
-
+app.post('/login',function(req,res) {
+    var username = req.body.username;
+    var password = req.body.password;
+  
+   pool.query ('SELECT *from "user" username = $1',[username],function(err,result) {
+      if(err) {
+          res.status(500).send(err.toString());
+      } else {
+          if(result.rows.length === 0) {
+              res.send(403).send('username is invalid');
+          } else {
+              
+          var dbString = result.rows[0].password;
+          var salt = dbString.split('$')[2]; 
+          var hashpwd = hash(password,salt);
+          if(hashpwd === dbString) {
+             res.send('Correct');
+          } else {
+              res.send(403).send('invalid');
+          }
+      }
+   });
+});
 var port = 80;
 app.listen(port, function () {
   console.log(`IMAD course app listening on port ${port}!`);
